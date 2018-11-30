@@ -19,7 +19,7 @@ def write_all_text(text_dir):
                     inp = f.readlines()
                     for line in inp:
                         # replacing delineation characters
-                        line = re.sub('[?？！!:/,.;；：／，。\(\)]',' ', line)
+                        line = re.sub('[“”、?？！!:/,.;；：／，。\(\)]',' ', line)
                         line = re.sub(' +',' ', line)
                         all_txt.extend(line.split())
         index = subdir.rfind('/')
