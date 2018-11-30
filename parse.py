@@ -12,8 +12,8 @@ def write_all_text(text_dir):
     all_txt = []
     subject = None
     for subdir, dirs, files in os.walk(text_dir):
-        if files[0] != '.DS_Store': # DS store
-            for file in files:
+        for file in files:
+            if file != '.DS_Store': # DS store
                 path = os.path.join(subdir, file)
                 with open(path, mode='rt', encoding="utf8") as f:
                     inp = f.readlines()
@@ -22,9 +22,10 @@ def write_all_text(text_dir):
                         line = re.sub('[:/,.;；：／，。\(\)]',' ', line)
                         line = re.sub(' +',' ', line)
                         all_txt.extend(line.split())
-        else:
-            subject = dirs[0] # shortcut to extracting subject name
+        index = subdir.rfind('/')
+        subject = subdir[index+1:]
         if subject:
+            # I was thinking that here we could write to csv then load into pandas
             write_path = 'processed_data/' + subject + '_result.txt'
             write_file = open(write_path,"w+")
             for g in all_txt:
