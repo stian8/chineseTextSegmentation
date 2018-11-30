@@ -9,9 +9,9 @@ def main():
 def write_all_text(text_dir):
     """Function to write all the groupings, each on its own line,
     to a text file per subject."""
-    all_txt = []
     subject = None
     for subdir, dirs, files in os.walk(text_dir):
+        all_txt = []
         for file in files:
             if file != '.DS_Store': # DS store
                 path = os.path.join(subdir, file)
@@ -19,7 +19,7 @@ def write_all_text(text_dir):
                     inp = f.readlines()
                     for line in inp:
                         # replacing delineation characters
-                        line = re.sub('[:/,.;；：／，。\(\)]',' ', line)
+                        line = re.sub('[?？！!:/,.;；：／，。\(\)]',' ', line)
                         line = re.sub(' +',' ', line)
                         all_txt.extend(line.split())
         index = subdir.rfind('/')
