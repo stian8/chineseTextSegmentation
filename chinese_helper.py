@@ -37,6 +37,9 @@ def clean_text():
             elif char == "不":
                 final.append(char)
                 final.append('1')
+            elif char == "了":
+                final.append(char)
+                final.append('1')
             else:
                 final.append(char)
                 final.append('0')
