@@ -32,12 +32,13 @@ def clean_text(inp, imed):
                     final.append(br)
                 except IndexError:
                     final.append(char)
-            elif char == "/":
+            elif char == "/" or char == "／":
                 final[-1] = '1'
-            elif char == "不":
+            elif char == "不" and (data[index + 1] != "/" or data[index + 1] != "／"):
                 final.append(char)
                 final.append('1')
-            elif char == "了":
+            elif char == "了" and (data[index + 1] != "/" or data[index + 1] != "／"):
+                final[-1] = '1'
                 final.append(char)
                 final.append('1')
             else:
@@ -55,35 +56,38 @@ def create_csv(imed, out):
                "POSB1", "POSF1", "POSF2"])
     with open(imed, mode='rt', encoding="utf8") as f:
         data=f.read().replace('\n', '')
+        data = re.sub(' +', '', data)
         sentences = re.findall('.*?[！。？]', data)
-        for s in sentences:
+        for i, s in enumerate(sentences):
+            if i == 0:
+                s = s[1:] # some funky thing was happening
             for index, char in enumerate(s):
                 if char in ['0', '1']:
                     # I need to clean this
-                    try:
-                        B2 = s[index - 3]
-                        _, POSB2= next(pseg.cut(B2))
-                    except IndexError:
+                    if index < 3:                          
                         B2 = "/s"
                         POSB2 = "NAN"
-                    try:
-                        B1 = s[index - 1]
-                        _, POSB1= next(pseg.cut(B1))
-                    except IndexError:
+                    else:
+                        B2 = s[index - 3]
+                        _, POSB2= next(pseg.cut(B2))
+                    if index == 0:
                         B1 = "/s"
                         POSB1 = "NAN"
-                    try:
-                        F1 = s[index + 1]
-                        _, POSF1= next(pseg.cut(F1))
-                    except IndexError:
+                    else:
+                        B1 = s[index - 1]
+                        _, POSB1= next(pseg.cut(B1))
+                    if index == (len(s) - 1):
                         F1 = "/s"
                         POSF1 = "NAN"
-                    try:
+                    else:
+                        F1 = s[index + 1]
+                        _, POSF1= next(pseg.cut(F1))
+                    if index > (len(s) - 4):
+                        F2 = "/s"
+                        POSF2 = 'NAN'
+                    else:
                         F2 = s[index + 3]
                         _, POSF2= next(pseg.cut(F2))
-                    except IndexError:
-                        F2 = "/s"
-                        POSF2 = "NAN"
                     w.writerow([char, str(index//2), B2, B1, F1, F2, POSB2, POSB1,
                                 POSF1, POSF2])
     write_file.close()
