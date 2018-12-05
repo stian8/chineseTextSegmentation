@@ -3,6 +3,7 @@ import re
 import sys
 import jieba.posseg as pseg
 import csv
+import json
 
 #INPUT = "truth_result.txt"
 #INTERMEDIATE = "truth_clean.txt"
@@ -10,9 +11,24 @@ import csv
 PUNC = set(['，',',','.','!',':',';','“', '"', '，', '。',
             '、', '！', '；', '？','……', '?', '：', '”'])
 CON = set(['的','地', '得']) # what to do about le, bu
-def main(inp, imed, out):
+def main(inp, imed, out, dict_file):
     clean_text(inp, imed)
     create_csv(imed, out)
+    create_word_dictionary(inp, dict_file)
+
+def create_word_dictionary(inp, dict_file):
+    dictionary = {'，':0, '。':1, '、':2, '！':3, '？':4, '；':5, '：':6}
+    index = 7
+    with open(inp, mode='rt', encoding="utf8") as f:
+        data=f.read().replace('\n', '')
+        data = re.sub('[“”、?？！!:/,.;；：／，。\(\)]', '', data)
+        for char in data:
+            if char not in dictionary:
+                dictionary[char] = index
+                index += 1
+    with open(dict_file, mode='w', encoding='utf-8-sig') as file:
+        file.write(json.dumps(dictionary, ensure_ascii=False))
+    return
 
 def clean_text(inp, imed):
     write_file = open(imed, mode="w", encoding='utf-8-sig')
@@ -95,4 +111,5 @@ if __name__ == "__main__":
     inp = sys.argv[1]
     imed = sys.argv[2]
     out = sys.argv[3]
-    main(inp, imed, out)
+    dict_file = sys.argv[4]
+    main(inp, imed, out, dict_file)
