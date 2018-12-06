@@ -8,12 +8,13 @@ from sklearn import metrics
 import csv
 import json
 import codecs
+import re
 
 LABEL = "Label"
 COLUMNS = ["Label", "No", "B2", "B1", "F1", "F2", "POSB2", "POSB1",
            "POSF1", "POSF2"]
 
-def main(training, testing, tr_dict, te_dict):
+def main(training, testing, tr_dict, te_dict, output_file):
     training_data = pd.read_csv(open(training), names=COLUMNS,
                          skipinitialspace=True,
                          skiprows=1, engine="python")
@@ -23,12 +24,14 @@ def main(training, testing, tr_dict, te_dict):
     training_dict = json.load(codecs.open(tr_dict, 'r', 'utf-8-sig'))
     testing_dict = json.load(codecs.open(te_dict, 'r', 'utf-8-sig'))
     corpus_dict = merge_dictionaries(training_dict, testing_dict)
+    reverse_dict = reverse_dictionary(corpus_dict)
     format_data(training_data, corpus_dict)
     format_data(testing_data, corpus_dict)
     model = generate_model(training_data)
     test_nolabel = testing_data.drop(LABEL,axis=1)
     actual = testing_data[LABEL]
     outputs = generate_predictions(model, test_nolabel)
+    reconstruct_data(outputs, output_file, reverse_dict)
     print(metrics.accuracy_score(actual, outputs[LABEL]))
 
 def format_data(data, corpus_dict):
@@ -54,7 +57,12 @@ def merge_dictionaries(training_dict, testing_dict):
                 index += 1
     dictionary['/s'] = index
     return dictionary
-    
+
+def reverse_dictionary(dictionary):
+    new_dictionary = {}
+    for key, value in dictionary.items():
+        new_dictionary[value] = key
+    return new_dictionary
     
 def generate_model(data):
     """Creates and trains our model, which is used to basic Chinese word segmentation.
@@ -102,9 +110,27 @@ def generate_predictions(model, testing):
     testing.to_csv("Segmentations.csv")
     return testing
 
+def reconstruct_data(outputs, output_file, reverse_dict):
+    result = []
+    for index, row in outputs.iterrows():
+        char = row["B1"]
+        label = row["Label"]
+        if label == 1:
+            result.append(reverse_dict[char])
+            result.append('/')
+        else:
+            result.append(reverse_dict[char])
+        if reverse_dict[row["F2"]] == '/s':
+            result.append(reverse_dict[row["F1"]])
+    str_res = re.sub('/s', '', ''.join(result))
+    str_res = re.sub('//', '/', str_res)
+    with open(output_file, mode='w', encoding='utf-8-sig') as file:
+        file.write(str_res)
+
 if __name__ == "__main__":
     training = sys.argv[1]
     testing = sys.argv[2]
     tr_dict = sys.argv[3]
     te_dict = sys.argv[4]
-    main(training, testing, tr_dict, te_dict)
+    output_file = sys.argv[5]
+    main(training, testing, tr_dict, te_dict, output_file)
