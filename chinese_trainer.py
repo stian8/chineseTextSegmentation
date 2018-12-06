@@ -6,23 +6,54 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.utils import shuffle
 from sklearn import metrics
 import csv
+import json
+import codecs
 
 LABEL = "Label"
 COLUMNS = ["Label", "No", "B2", "B1", "F1", "F2", "POSB2", "POSB1",
            "POSF1", "POSF2"]
 
-def main(training, testing):
+def main(training, testing, tr_dict, te_dict):
     training_data = pd.read_csv(open(training), names=COLUMNS,
                          skipinitialspace=True,
                          skiprows=1, engine="python")
     testing_data = pd.read_csv(open(testing), names=COLUMNS,
                          skipinitialspace=True,
                          skiprows=1, engine="python")
+    training_dict = json.load(codecs.open(tr_dict, 'r', 'utf-8-sig'))
+    testing_dict = json.load(codecs.open(te_dict, 'r', 'utf-8-sig'))
+    corpus_dict = merge_dictionaries(training_dict, testing_dict)
+    format_data(training_data, corpus_dict)
+    format_data(testing_data, corpus_dict)
     model = generate_model(training_data)
     test_nolabel = testing_data.drop(LABEL,axis=1)
     actual = testing_data[LABEL]
     outputs = generate_predictions(model, test_nolabel)
     print(metrics.accuracy_score(actual, outputs[LABEL]))
+
+def format_data(data, corpus_dict):
+    data["B2"] = data["B2"].apply(lambda x: corpus_dict[x])
+    data["B1"] = data["B1"].apply(lambda x: corpus_dict[x])
+    data["F1"] = data["F1"].apply(lambda x: corpus_dict[x])
+    data["F2"] = data["F2"].apply(lambda x: corpus_dict[x])
+    data["POSB2"] = data["POSB2"].astype('category')
+    data["POSB2"] = data["POSB2"].cat.codes
+    data["POSB1"] = data["POSB1"].astype('category')
+    data["POSB1"] = data["POSB1"].cat.codes
+    data["POSF1"] = data["POSF1"].astype('category')
+    data["POSF1"] = data["POSF1"].cat.codes
+    data["POSF2"] = data["POSF2"].astype('category')
+    data["POSF2"] = data["POSF2"].cat.codes
+
+def merge_dictionaries(training_dict, testing_dict):
+    dictionary = training_dict
+    index = max(training_dict.values()) + 1
+    for key in testing_dict.keys():
+        if key not in dictionary:
+                dictionary[key] = index
+                index += 1
+    dictionary['/s'] = index
+    return dictionary
     
     
 def generate_model(data):
@@ -66,7 +97,7 @@ def generate_predictions(model, testing):
     Returns:
         input text with predictinos, prints results to "Segmentations.csv". 
     """
-    predictions=model.predict(inputs)
+    predictions=model.predict(testing)
     testing[LABEL] = predictions
     testing.to_csv("Segmentations.csv")
     return testing
@@ -74,4 +105,6 @@ def generate_predictions(model, testing):
 if __name__ == "__main__":
     training = sys.argv[1]
     testing = sys.argv[2]
-    main(training, testing)
+    tr_dict = sys.argv[3]
+    te_dict = sys.argv[4]
+    main(training, testing, tr_dict, te_dict)

@@ -17,11 +17,11 @@ def main(inp, imed, out, dict_file):
     create_word_dictionary(inp, dict_file)
 
 def create_word_dictionary(inp, dict_file):
-    dictionary = {'，':0, '。':1, '、':2, '！':3, '？':4, '；':5, '：':6}
+    dictionary = {'，': 0, '。': 1, '、': 2, '！': 3, '？': 4, '；': 5, '：': 6}
     index = 7
     with open(inp, mode='rt', encoding="utf8") as f:
         data=f.read().replace('\n', '')
-        data = re.sub('[“”、?？！!:/,.;；：／，。\(\)]', '', data)
+        data = re.sub('[“”、？！/；：／，。\(\)]', '', data)
         for char in data:
             if char not in dictionary:
                 dictionary[char] = index
