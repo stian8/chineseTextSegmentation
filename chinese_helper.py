@@ -11,12 +11,16 @@ import json
 PUNC = set(['，',',','.','!',':',';','“', '"', '，', '。',
             '、', '！', '；', '？','……', '?', '：', '”'])
 CON = set(['的','地', '得']) # what to do about le, bu
+COLUMNS = ["Label", "No", "B3", "B2", "B1", "F1", "F2", "F3", "POSB3", "POSB2", "POSB1",
+           "POSF1", "POSF2", "POSF3"] # No being the position in sentence
 def main(inp, imed, out, dict_file):
     clean_text(inp, imed)
     create_csv(imed, out)
     create_word_dictionary(inp, dict_file)
 
 def create_word_dictionary(inp, dict_file):
+    """Creates a word dictionary from 
+    """
     dictionary = {'，': 0, '。': 1, '、': 2, '！': 3, '？': 4, '；': 5, '：': 6}
     index = 7
     with open(inp, mode='rt', encoding="utf8") as f:
@@ -64,22 +68,37 @@ def clean_text(inp, imed):
     write_file.close()
 
 def create_csv(imed, out):
+    """ Creates/writes csv (utf-8-sig) with label and features generated from
+    the data. The first row of the csv contains names of the features/labels.
+    The columns are as follows:["Label", "No", "B3", "B2", "B1", "F1", "F2",
+    "F3", "POSB3", "POSB2","POSB1","POSF1", "POSF2", "POSF3"]
+    Args:
+        imed: filename of intermediate file, in which the characters are
+            split by either a 0 or 1, 1 marking the existence of a split,
+            0 otherwise.
+        out: filename of output csv file, described above.
+    Returns:
+        None
+    """
     write_file = open(out, mode="w", encoding='utf-8-sig')
     w = csv.writer(write_file)
-    window = [None for _ in range(5)]
-    # No being which number split it is
-    w.writerow(["Label", "No", "B2", "B1", "F1", "F2", "POSB2",
-               "POSB1", "POSF1", "POSF2"])
+    w.writerow(COLUMNS)
     with open(imed, mode='rt', encoding="utf8") as f:
         data=f.read().replace('\n', '')
         data = re.sub(' +', '', data)
         sentences = re.findall('.*?[！。？]', data)
         for i, s in enumerate(sentences):
-            if i == 0:
-                s = s[1:] # some funky thing was happening
+            if i == 0: # resolving a bug with start of text character
+                s = s[1:]
             for index, char in enumerate(s):
                 if char in ['0', '1']:
-                    # I need to clean this
+                    # TODO: I need to clean this
+                    if index < 5:
+                        B3 = "/s"
+                        POSB3 = "NAN"
+                    else:
+                        B3 = s[index - 5]
+                        _, POSB3= next(pseg.cut(B3))
                     if index < 3:                          
                         B2 = "/s"
                         POSB2 = "NAN"
@@ -104,12 +123,19 @@ def create_csv(imed, out):
                     else:
                         F2 = s[index + 3]
                         _, POSF2= next(pseg.cut(F2))
-                    w.writerow([char, str(index//2), B2, B1, F1, F2, POSB2, POSB1,
+                    if index > (len(s) - 6):
+                        F3 = "/s"
+                        POSF3 = "NAN"
+                    else:
+                        F3 = s[index + 5]
+                        _, POSF3= next(pseg.cut(F3))
+                    w.writerow([char, str(index//2), B3, B2, B1, F1, F2, F3, POSB2, POSB1,
                                 POSF1, POSF2])
     write_file.close()
 if __name__ == "__main__":
-    inp = sys.argv[1]
+    inp = sys.argv[1] # name of segmented text file (ex. testing/kw_result.txt)
+    # filename for intermediate results, for debugging (ex. testing/kw_clean.txt)
     imed = sys.argv[2]
-    out = sys.argv[3]
-    dict_file = sys.argv[4]
+    out = sys.argv[3] # output csv file for features/labels (ex.testing/kw_test.csv)
+    dict_file = sys.argv[4] # output filename for char dictionary (ex.testing/kw_dict.txt)
     main(inp, imed, out, dict_file)

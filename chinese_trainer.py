@@ -1,3 +1,4 @@
+# Logistic Regression Model for Chinese 
 import pandas as pd
 import numpy as np
 import sys
@@ -11,8 +12,9 @@ import codecs
 import re
 
 LABEL = "Label"
-COLUMNS = ["Label", "No", "B2", "B1", "F1", "F2", "POSB2", "POSB1",
-           "POSF1", "POSF2"]
+COLUMNS = ["Label", "No", "B3", "B2", "B1", "F1", "F2", "F3", "POSB3", "POSB2", "POSB1",
+           "POSF1", "POSF2", "POSF3"]
+POS_DICT = training_dict = json.load(open('pos.txt', 'r'))
 
 def main(training, testing, tr_dict, te_dict, output_file):
     training_data = pd.read_csv(open(training), names=COLUMNS,
@@ -35,20 +37,51 @@ def main(training, testing, tr_dict, te_dict, output_file):
     print(metrics.accuracy_score(actual, outputs[LABEL]))
 
 def format_data(data, corpus_dict):
+    """Helper function to format the features in the input data frame
+        into a form that trained on. All characters are given IDs, while
+        POS tags are label encoded.
+    """
+    data.drop(["No"], axis = 1)
+    data["B3"] = data["B3"].apply(lambda x: corpus_dict[x])
     data["B2"] = data["B2"].apply(lambda x: corpus_dict[x])
     data["B1"] = data["B1"].apply(lambda x: corpus_dict[x])
     data["F1"] = data["F1"].apply(lambda x: corpus_dict[x])
     data["F2"] = data["F2"].apply(lambda x: corpus_dict[x])
-    data["POSB2"] = data["POSB2"].astype('category')
-    data["POSB2"] = data["POSB2"].cat.codes
-    data["POSB1"] = data["POSB1"].astype('category')
-    data["POSB1"] = data["POSB1"].cat.codes
-    data["POSF1"] = data["POSF1"].astype('category')
-    data["POSF1"] = data["POSF1"].cat.codes
-    data["POSF2"] = data["POSF2"].astype('category')
-    data["POSF2"] = data["POSF2"].cat.codes
+    data["F3"] = data["F3"].apply(lambda x: corpus_dict[x])
+    data["POSB3"] = data["POSB3"].apply(lambda x: POS_DICT[x])
+    data["POSB2"] = data["POSB2"].apply(lambda x: POS_DICT[x])
+    data["POSB1"] = data["POSB1"].apply(lambda x: POS_DICT[x])
+    data["POSF1"] = data["POSF1"].apply(lambda x: POS_DICT[x])
+    data["POSF2"] = data["POSF2"].fillna("NAN")
+    data["POSF2"] = data["POSF2"].apply(lambda x: POS_DICT[x])
+    data["POSF3"] = data["POSF3"].fillna("NAN")
+    data["POSF3"] = data["POSF3"].apply(lambda x: POS_DICT[x])
+
+##    data["POSB3"] = data["POSB3"].astype('category')
+##    data["POSB3"] = data["POSB3"].cat.codes
+##    data["POSB2"] = data["POSB2"].astype('category')
+##    data["POSB2"] = data["POSB2"].cat.codes
+##    data["POSB1"] = data["POSB1"].astype('category')
+##    data["POSB1"] = data["POSB1"].cat.codes
+##    data["POSF1"] = data["POSF1"].astype('category')
+##    data["POSF1"] = data["POSF1"].cat.codes
+##    data["POSF2"] = data["POSF2"].astype('category')
+##    data["POSF2"] = data["POSF2"].cat.codes
+##    data["POSF3"] = data["POSF3"].astype('category')
+##    data["POSF3"] = data["POSF3"].cat.codes
 
 def merge_dictionaries(training_dict, testing_dict):
+    """Merges dictionaries of character -> ID such that each character
+        has its own unique ID.
+    Args:
+        training_dict: dictionary of characters -> ID in training data
+        testing_dict: dictionary of characters -> ID in testing data,
+            the IDs do not necessarily have to be the same/different as
+            the training_dict.
+    Returns:
+        A merged dictionary giving each character in both the training and
+        testing corpus a unique ID.
+    """
     dictionary = training_dict
     index = max(training_dict.values()) + 1
     for key in testing_dict.keys():
@@ -59,6 +92,12 @@ def merge_dictionaries(training_dict, testing_dict):
     return dictionary
 
 def reverse_dictionary(dictionary):
+    """Function to reverse a dictionary from keys:values to values:keys.
+    Args:
+        dictionary: A dictionary.
+    Returns:
+        The reverse of the input dictionary.
+    """
     new_dictionary = {}
     for key, value in dictionary.items():
         new_dictionary[value] = key
@@ -78,7 +117,7 @@ def generate_model(data):
     # Splitting the data in training and testing data
     X_train,X_test,Y_train,Y_test = train_test_split(X,Y,test_size=0.25,random_state=0)
     # Creating the model
-    LR = LogisticRegression(penalty='l2', C=100)
+    LR = LogisticRegression(penalty='l2', C=10)
     # Fitting the model
     LR.fit(X_train,Y_train)
     # Generating predictions
@@ -101,7 +140,7 @@ def generate_predictions(model, testing):
     """Generates predictions for the inputted data using the model.
     Args:
         model: A trained logistic regression model. 
-        testing: Chinese text of a different corpus, without the label.
+        testing: Chinese text of a different corpus, without the labels.
     Returns:
         input text with predictinos, prints results to "Segmentations.csv". 
     """
@@ -111,18 +150,31 @@ def generate_predictions(model, testing):
     return testing
 
 def reconstruct_data(outputs, output_file, reverse_dict):
+    """Reconstructs the data from the predicted data using a dictionary
+        mapping ID to Chinese characters. Writes result to the output filename.
+    Args:
+        outputs: pandas dataframe contained the predicted labels, along with
+            the original features.
+        output_file: filename of the file to write the results to.
+        reverse_dictionary: a dictionary mapping ID to Chinese characters.
+    Returns:
+        None
+    """
     result = []
     for index, row in outputs.iterrows():
         char = row["B1"]
         label = row["Label"]
-        if label == 1:
+        if label == 1: # a split
             result.append(reverse_dict[char])
             result.append('/')
-        else:
+        else: # label is 0 and there is no split
             result.append(reverse_dict[char])
+        # we have reached a sentence end
         if reverse_dict[row["F2"]] == '/s':
             result.append(reverse_dict[row["F1"]])
+    # remove all the filler strings
     str_res = re.sub('/s', '', ''.join(result))
+    # making sure no double // added
     str_res = re.sub('//', '/', str_res)
     with open(output_file, mode='w', encoding='utf-8-sig') as file:
         file.write(str_res)
