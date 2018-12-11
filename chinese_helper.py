@@ -11,8 +11,8 @@ import json
 PUNC = set(['，',',','.','!',':',';','“', '"', '，', '。',
             '、', '！', '；', '？','……', '?', '：', '”'])
 CON = set(['的','地', '得']) # what to do about le, bu
-COLUMNS = ["Label", "No", "B3", "B2", "B1", "F1", "F2", "F3", "POSB3", "POSB2", "POSB1",
-           "POSF1", "POSF2", "POSF3"] # No being the position in sentence
+COLUMNS = ["Label", "No", "B4", "B3", "B2", "B1", "F1", "F2", "F3", "F4", "POSB4", "POSB3", "POSB2", "POSB1",
+           "POSF1", "POSF2", "POSF3", "POSF4"] # No being the position in sentence
 def main(inp, imed, out, dict_file):
     clean_text(inp, imed)
     create_csv(imed, out)
@@ -93,6 +93,12 @@ def create_csv(imed, out):
             for index, char in enumerate(s):
                 if char in ['0', '1']:
                     # TODO: I need to clean this
+                    if index < 7:
+                        B4 = "/s"
+                        POSB4 = "NAN"
+                    else:
+                        B4 = s[index - 7]
+                        _, POSB4= next(pseg.cut(B4))
                     if index < 5:
                         B3 = "/s"
                         POSB3 = "NAN"
@@ -129,8 +135,14 @@ def create_csv(imed, out):
                     else:
                         F3 = s[index + 5]
                         _, POSF3= next(pseg.cut(F3))
-                    w.writerow([char, str(index//2), B3, B2, B1, F1, F2, F3, POSB2, POSB1,
-                                POSF1, POSF2])
+                    if index > (len(s) - 8):
+                        F4 = "/s"
+                        POSF4 = "NAN"
+                    else:
+                        F4 = s[index + 7]
+                        _, POSF4= next(pseg.cut(F4))
+                    w.writerow([char, str(index//2), B4, B3, B2, B1, F1, F2, F3, F4, POSB4, POSB3, POSB2, POSB1,
+                                POSF1, POSF2, POSF3, POSF4])
     write_file.close()
 if __name__ == "__main__":
     inp = sys.argv[1] # name of segmented text file (ex. testing/kw_result.txt)
