@@ -3,7 +3,7 @@ import sys
 import os
 
 #DIR = 'raw_data/'
-#OUT = 'processed_data/'
+#OUT = 'testing/'
 def main(input_dir, output_dir):
     write_all_text(input_dir, output_dir)           
 

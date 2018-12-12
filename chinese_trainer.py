@@ -117,7 +117,7 @@ def generate_model(data):
     # Splitting the data in training and testing data
     X_train,X_test,Y_train,Y_test = train_test_split(X,Y,test_size=0.25,random_state=0)
     # Creating the model
-    LR = LogisticRegression(penalty='l2', C=10)
+    LR = LogisticRegression(penalty='l2')
     # Fitting the model
     LR.fit(X_train,Y_train)
     # Generating predictions
