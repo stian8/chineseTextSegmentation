@@ -19,7 +19,11 @@ def main(inp, imed, out, dict_file):
     create_word_dictionary(inp, dict_file)
 
 def create_word_dictionary(inp, dict_file):
-    """Creates a word dictionary from 
+    """Creates a word dictionary from the original data file. Used for encoding
+    in the trainer later.
+    Args:
+        inp: the filename of the original, tagged input file
+        dict_file: the filename that the dictionary is to be written to.
     """
     dictionary = {'，': 0, '。': 1, '、': 2, '！': 3, '？': 4, '；': 5, '：': 6}
     index = 7
