@@ -11,8 +11,8 @@ import json
 PUNC = set(['，',',','.','!',':',';','“', '"', '，', '。',
             '、', '！', '；', '？','……', '?', '：', '”'])
 CON = set(['的','地', '得']) # what to do about le, bu
-COLUMNS = ["Label", "No", "B4", "B3", "B2", "B1", "F1", "F2", "F3", "F4", "POSB4", "POSB3", "POSB2", "POSB1",
-           "POSF1", "POSF2", "POSF3", "POSF4"] # No being the position in sentence
+COLUMNS = ["Label", "No", "B2", "B1", "F1", "F2", "POSB2", "POSB1",
+           "POSF1", "POSF2"] # No being the position in sentence
 def main(inp, imed, out, dict_file):
     clean_text(inp, imed)
     create_csv(imed, out)
@@ -54,7 +54,13 @@ def clean_text(inp, imed):
                     final.append(char)
             elif char == "/" or char == "／":
                 final[-1] = '1'
-            elif char == "不" and (data[index + 1] != "/" or data[index + 1] != "／"):
+            elif char == "不" and (data[index - 1] != data[index + 1]) and(data[index + 1] != "/" or data[index + 1] != "／"):
+                final.append(char)
+                final.append('1')
+            elif char == "没" and (data[index + 1] != "/" or data[index + 1] != "／"):
+                final.append(char)
+                final.append('1')
+            elif char == "很" and (data[index + 1] != "/" or data[index + 1] != "／"):
                 final.append(char)
                 final.append('1')
             elif char == "了" and (data[index + 1] != "/" or data[index + 1] != "／"):
@@ -93,18 +99,18 @@ def create_csv(imed, out):
             for index, char in enumerate(s):
                 if char in ['0', '1']:
                     # TODO: I need to clean this
-                    if index < 7:
-                        B4 = "/s"
-                        POSB4 = "NAN"
-                    else:
-                        B4 = s[index - 7]
-                        _, POSB4= next(pseg.cut(B4))
-                    if index < 5:
-                        B3 = "/s"
-                        POSB3 = "NAN"
-                    else:
-                        B3 = s[index - 5]
-                        _, POSB3= next(pseg.cut(B3))
+                    # if index < 7:
+                    #     B4 = "/s"
+                    #     POSB4 = "NAN"
+                    # else:
+                    #     B4 = s[index - 7]
+                    #     _, POSB4= next(pseg.cut(B4))
+                    # if index < 5:
+                    #     B3 = "/s"
+                    #     POSB3 = "NAN"
+                    # else:
+                    #     B3 = s[index - 5]
+                    #     _, POSB3= next(pseg.cut(B3))
                     if index < 3:                          
                         B2 = "/s"
                         POSB2 = "NAN"
@@ -129,20 +135,20 @@ def create_csv(imed, out):
                     else:
                         F2 = s[index + 3]
                         _, POSF2= next(pseg.cut(F2))
-                    if index > (len(s) - 6):
-                        F3 = "/s"
-                        POSF3 = "NAN"
-                    else:
-                        F3 = s[index + 5]
-                        _, POSF3= next(pseg.cut(F3))
-                    if index > (len(s) - 8):
-                        F4 = "/s"
-                        POSF4 = "NAN"
-                    else:
-                        F4 = s[index + 7]
-                        _, POSF4= next(pseg.cut(F4))
-                    w.writerow([char, str(index//2), B4, B3, B2, B1, F1, F2, F3, F4, POSB4, POSB3, POSB2, POSB1,
-                                POSF1, POSF2, POSF3, POSF4])
+                    # if index > (len(s) - 6):
+                    #     F3 = "/s"
+                    #     POSF3 = "NAN"
+                    # else:
+                    #     F3 = s[index + 5]
+                    #     _, POSF3= next(pseg.cut(F3))
+                    # if index > (len(s) - 8):
+                    #     F4 = "/s"
+                    #     POSF4 = "NAN"
+                    # else:
+                    #     F4 = s[index + 7]
+                    #     _, POSF4= next(pseg.cut(F4))
+                    w.writerow([char, str(index//2), B2, B1, F1, F2, POSB2, POSB1,
+                                POSF1, POSF2])
     write_file.close()
 if __name__ == "__main__":
     inp = sys.argv[1] # name of segmented text file (ex. testing/kw_result.txt)
