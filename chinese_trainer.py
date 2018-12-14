@@ -11,13 +11,14 @@ import json
 import codecs
 import re
 LABEL = "Label"
+# Uncomment out below when including more context
 COLUMNS = ["Label", "No", #"B4", "B3",
            "B2", "B1", "F1", "F2",
            #"F3", "F4","POSB4","POSB3",
            "POSB2", "POSB1",
            "POSF1", "POSF2",
            #"POSF3", "POSF4"
-           ]
+           ] 
 POS_DICT = training_dict = json.load(open('pos.txt', 'r'))
 
 def main(training, testing, tr_dict, te_dict, output_file):
@@ -45,6 +46,7 @@ def format_data(data, corpus_dict):
         into a form that trained on. All characters are given IDs, while
         POS tags are label encoded.
     """
+    # Uncomment out below when using more context
     data.drop(["No"], axis = 1)
     #data["B4"] = data["B4"].apply(lambda x: corpus_dict[x])
     #data["B3"] = data["B3"].apply(lambda x: corpus_dict[x])
@@ -67,19 +69,6 @@ def format_data(data, corpus_dict):
 #    data["POSF3"] = data["POSF3"].apply(lambda x: POS_DICT[x])
 #    data["POSF4"] = data["POSF4"].fillna("NAN")
 #    data["POSF4"] = data["POSF4"].apply(lambda x: POS_DICT[x])
-
-##    data["POSB3"] = data["POSB3"].astype('category')
-##    data["POSB3"] = data["POSB3"].cat.codes
-##    data["POSB2"] = data["POSB2"].astype('category')
-##    data["POSB2"] = data["POSB2"].cat.codes
-##    data["POSB1"] = data["POSB1"].astype('category')
-##    data["POSB1"] = data["POSB1"].cat.codes
-##    data["POSF1"] = data["POSF1"].astype('category')
-##    data["POSF1"] = data["POSF1"].cat.codes
-##    data["POSF2"] = data["POSF2"].astype('category')
-##    data["POSF2"] = data["POSF2"].cat.codes
-##    data["POSF3"] = data["POSF3"].astype('category')
-##    data["POSF3"] = data["POSF3"].cat.codes
 
 def merge_dictionaries(training_dict, testing_dict):
     """Merges dictionaries of character -> ID such that each character
@@ -134,9 +123,6 @@ def generate_model(data):
     # Generating predictions
     predictions=LR.predict(X_test)
     print(LR.score(X_test,Y_test))
-    # When uncommented, this will let us see the list of predictions
-    # print('True values:', Y_test.tolist())
-    # print('Predictions:', predictions.tolist())
     # Metrics
     predict_proba = LR.predict_proba(X_test)
     accuracy_score = metrics.accuracy_score(Y_test, predictions)

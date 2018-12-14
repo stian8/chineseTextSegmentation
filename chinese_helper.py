@@ -13,7 +13,7 @@ import json
 
 PUNC = set(['，',',','.','!',':',';','“', '"', '，', '。',
             '、', '！', '；', '？','……', '?', '：', '”'])
-CON = set(['的','地', '得']) # what to do about le, bu
+CON = set(['的','地', '得']) 
 COLUMNS = ["Label", "No", "B2", "B1", "F1", "F2", "POSB2", "POSB1",
            "POSF1", "POSF2"] # No being the position in sentence
 def main(inp, imed, out, dict_file):
@@ -68,6 +68,7 @@ def clean_text(inp, imed):
                     final.append(br)
                 except IndexError:
                     final.append(char)
+            # implementing our rules
             elif char == "/" or char == "／":
                 final[-1] = '1'
             elif char == "不" and (data[index - 1] != data[index + 1]) and(data[index + 1] != "/" or data[index + 1] != "／"):
@@ -114,7 +115,7 @@ def create_csv(imed, out):
                 s = s[1:]
             for index, char in enumerate(s):
                 if char in ['0', '1']:
-                    # TODO: I need to clean this
+                    # uncomment out for more context, and adjust in trainer
                     # if index < 7:
                     #     B4 = "/s"
                     #     POSB4 = "NAN"
