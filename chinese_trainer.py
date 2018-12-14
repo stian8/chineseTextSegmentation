@@ -10,10 +10,14 @@ import csv
 import json
 import codecs
 import re
-
 LABEL = "Label"
-COLUMNS = ["Label", "No", "B2", "B1", "F1", "F2", "POSB2", "POSB1",
-           "POSF1", "POSF2"]
+COLUMNS = ["Label", "No", #"B4", "B3",
+           "B2", "B1", "F1", "F2",
+           #"F3", "F4","POSB4","POSB3",
+           "POSB2", "POSB1",
+           "POSF1", "POSF2",
+           #"POSF3", "POSF4"
+           ]
 POS_DICT = training_dict = json.load(open('pos.txt', 'r'))
 
 def main(training, testing, tr_dict, te_dict, output_file):
@@ -42,27 +46,27 @@ def format_data(data, corpus_dict):
         POS tags are label encoded.
     """
     data.drop(["No"], axis = 1)
-    # data["B4"] = data["B4"].apply(lambda x: corpus_dict[x])
-    # data["B3"] = data["B3"].apply(lambda x: corpus_dict[x])
+    #data["B4"] = data["B4"].apply(lambda x: corpus_dict[x])
+    #data["B3"] = data["B3"].apply(lambda x: corpus_dict[x])
     data["B2"] = data["B2"].apply(lambda x: corpus_dict[x])
     data["B1"] = data["B1"].apply(lambda x: corpus_dict[x])
     data["F1"] = data["F1"].apply(lambda x: corpus_dict[x])
     data["F2"] = data["F2"].apply(lambda x: corpus_dict[x])
     # data["F3"] = data["F3"].fillna('NAN')
-    # data["F3"] = data["F3"].apply(lambda x: corpus_dict[x])
+    #data["F3"] = data["F3"].apply(lambda x: corpus_dict[x])
     # data["F4"] = data["F4"].fillna("NAN")
-    # data["F4"] = data["F4"].apply(lambda x: corpus_dict[x])
-    # data["POSB4"] = data["POSB4"].apply(lambda x: POS_DICT[x])
-    # data["POSB3"] = data["POSB3"].apply(lambda x: POS_DICT[x])
+    #data["F4"] = data["F4"].apply(lambda x: corpus_dict[x])
+    #data["POSB4"] = data["POSB4"].apply(lambda x: POS_DICT[x])
+    #data["POSB3"] = data["POSB3"].apply(lambda x: POS_DICT[x])
     data["POSB2"] = data["POSB2"].apply(lambda x: POS_DICT[x])
     data["POSB1"] = data["POSB1"].apply(lambda x: POS_DICT[x])
     data["POSF1"] = data["POSF1"].apply(lambda x: POS_DICT[x])
     data["POSF2"] = data["POSF2"].fillna("NAN")
     data["POSF2"] = data["POSF2"].apply(lambda x: POS_DICT[x])
-    # data["POSF3"] = data["POSF3"].fillna("NAN")
-    # data["POSF3"] = data["POSF3"].apply(lambda x: POS_DICT[x])
-    # data["POSF4"] = data["POSF4"].fillna("NAN")
-    # data["POSF4"] = data["POSF4"].apply(lambda x: POS_DICT[x])
+   # data["POSF3"] = data["POSF3"].fillna("NAN")
+#    data["POSF3"] = data["POSF3"].apply(lambda x: POS_DICT[x])
+#    data["POSF4"] = data["POSF4"].fillna("NAN")
+#    data["POSF4"] = data["POSF4"].apply(lambda x: POS_DICT[x])
 
 ##    data["POSB3"] = data["POSB3"].astype('category')
 ##    data["POSB3"] = data["POSB3"].cat.codes

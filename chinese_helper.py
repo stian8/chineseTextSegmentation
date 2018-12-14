@@ -109,12 +109,12 @@ def create_csv(imed, out):
                     # else:
                     #     B4 = s[index - 7]
                     #     _, POSB4= next(pseg.cut(B4))
-                    # if index < 5:
-                    #     B3 = "/s"
-                    #     POSB3 = "NAN"
-                    # else:
-                    #     B3 = s[index - 5]
-                    #     _, POSB3= next(pseg.cut(B3))
+                    if index < 5:
+                        B3 = "/s"
+                        POSB3 = "NAN"
+                    else:
+                        B3 = s[index - 5]
+                        _, POSB3= next(pseg.cut(B3))
                     if index < 3:                          
                         B2 = "/s"
                         POSB2 = "NAN"
@@ -139,12 +139,12 @@ def create_csv(imed, out):
                     else:
                         F2 = s[index + 3]
                         _, POSF2= next(pseg.cut(F2))
-                    # if index > (len(s) - 6):
-                    #     F3 = "/s"
-                    #     POSF3 = "NAN"
-                    # else:
-                    #     F3 = s[index + 5]
-                    #     _, POSF3= next(pseg.cut(F3))
+                    if index > (len(s) - 6):
+                        F3 = "/s"
+                        POSF3 = "NAN"
+                    else:
+                        F3 = s[index + 5]
+                        _, POSF3= next(pseg.cut(F3))
                     # if index > (len(s) - 8):
                     #     F4 = "/s"
                     #     POSF4 = "NAN"
