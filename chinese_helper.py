@@ -1,13 +1,16 @@
 # File for cleaning and putting data into correct format
 import re
 import sys
-import jieba.posseg as pseg
+import jieba.posseg as pseg # pip3 install jieba
 import csv
 import json
 
-#INPUT = "truth_result.txt"
-#INTERMEDIATE = "truth_clean.txt"
-#OUTPUT  = "training.csv"
+# For the training data
+# INPUT = "training/truth_result.txt"
+# INTERMEDIATE = "training/truth_clean.txt"
+# OUTPUT  = "training/training.csv"
+# DICT = "training/training_dict.txt"
+
 PUNC = set(['，',',','.','!',':',';','“', '"', '，', '。',
             '、', '！', '；', '？','……', '?', '：', '”'])
 CON = set(['的','地', '得']) # what to do about le, bu
@@ -39,6 +42,15 @@ def create_word_dictionary(inp, dict_file):
     return
 
 def clean_text(inp, imed):
+    """File to clean text based on our rule speciications. Creates a
+    body of text demarcated by 0 for no-split and 1 for split.
+    Writes this out to an intermediate file.
+    Args:
+        inp: filename with input text, demarcated by /
+        imed: filename to write clean text to.
+    Returns:
+        None, write out to imed
+    """
     write_file = open(imed, mode="w", encoding='utf-8-sig')
     result = ""
     with open(inp, mode='rt', encoding="utf8") as f:
@@ -155,9 +167,9 @@ def create_csv(imed, out):
                                 POSF1, POSF2])
     write_file.close()
 if __name__ == "__main__":
-    inp = sys.argv[1] # name of segmented text file (ex. testing/kw_result.txt)
-    # filename for intermediate results, for debugging (ex. testing/kw_clean.txt)
+    inp = sys.argv[1] # name of segmented text file (ex. testing/kw/kw_result.txt)
+    # filename for intermediate results, for debugging (ex. testing/kw/kw_clean.txt)
     imed = sys.argv[2]
-    out = sys.argv[3] # output csv file for features/labels (ex.testing/kw_test.csv)
-    dict_file = sys.argv[4] # output filename for char dictionary (ex.testing/kw_dict.txt)
+    out = sys.argv[3] # output csv file for features/labels (ex.testing/kw/kw_test.csv)
+    dict_file = sys.argv[4] # output filename for char dictionary (ex.testing/kw/kw_dict.txt)
     main(inp, imed, out, dict_file)

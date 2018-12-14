@@ -1,4 +1,4 @@
-# Logistic Regression Model for Chinese 
+# Logistic Regression Model for Chinese Word Segmentation 
 import pandas as pd
 import numpy as np
 import sys
@@ -191,9 +191,9 @@ def reconstruct_data(outputs, output_file, reverse_dict):
         file.write(str_res)
 
 if __name__ == "__main__":
-    training = sys.argv[1]
-    testing = sys.argv[2]
-    tr_dict = sys.argv[3]
-    te_dict = sys.argv[4]
-    output_file = sys.argv[5]
+    training = sys.argv[1] # for ex. training/training.csv
+    testing = sys.argv[2] # for ex. testing/kw/kw_testing.csv
+    tr_dict = sys.argv[3] # for ex. training/training_dict.txt
+    te_dict = sys.argv[4] # for ex. testing/kw/kw_dict.txt
+    output_file = sys.argv[5] # for ex. outputs/kw/kw_predicted2.txt
     main(training, testing, tr_dict, te_dict, output_file)
