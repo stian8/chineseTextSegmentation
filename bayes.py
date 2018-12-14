@@ -16,7 +16,7 @@ def main(input_file, test_file, output_file):
 def create_frequency_dictionary(data):
     """Creates a frequency dictionary of tokens from the text.
     Args:
-        data:
+        data: training corpus with no line breaks or spaces.
     Returns:
         tuple of:
             frequency_dict: tokens to counts
@@ -24,9 +24,6 @@ def create_frequency_dictionary(data):
     """
     total_tokens = 0
     frequency_dict = {}
-##    with open(input_file, mode='rt', encoding="utf8") as f:
-##        data=f.read().replace('\n', '')
-##        data = re.sub(' +', '', data)
     sentences = re.findall('.*?[！。？]', data)
     for i, s in enumerate(sentences):
         if i == 0: # resolving a bug with start of text character
@@ -42,7 +39,9 @@ def create_frequency_dictionary(data):
     return frequency_dict, total_tokens
 
 def segment(test_file, output_file, prob_dict):
-    "Return a list of words that is the best segmentation of text."
+    """Return a list of words that is the best segmentation of text.
+    Driver function of recursive_seg.
+    """
     write_file = open(output_file, mode="w", encoding='utf-8-sig')
     with open(test_file, mode='rt', encoding="utf8") as f:
         data=f.read().replace('\n', '')
@@ -75,7 +74,7 @@ def segment(test_file, output_file, prob_dict):
     return predicted
 
 def memo(f):
-    "Memoization of function f"
+    """Memoization of function f"""
     table = {}
     def fmemo(*args):
             if args[0] not in table:
@@ -101,6 +100,8 @@ def recursive_seg(text, prob_dict):
 def get_accuracy(original, predicted):
     num_splits = float(original.count('1') + original.count('0'))
     #return (num_splits - sum(o != p for o,p in zip(original, predicted)))/num_splits
+    # used Lev distance in case we have a shift, since all the characters
+    # should be the same this still gives a good accuracy measure
     return (num_splits - Lev.distance(original, predicted))/num_splits
 
 def product(nums):
